@@ -25,7 +25,7 @@ def create_database():
     # Main product catalog with ML features
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS accessories (
-            accessory_id TEXT PRIMARY KEY,
+            accessory_id INTEGER PRIMARY KEY,
             car_brand TEXT NOT NULL,
             car_model TEXT NOT NULL,
             accessory_name TEXT NOT NULL,
@@ -122,7 +122,7 @@ def create_database():
         CREATE TABLE IF NOT EXISTS cart_items (
             cart_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
-            accessory_id TEXT NOT NULL,
+            accessory_id INTEGER NOT NULL,
             quantity INTEGER DEFAULT 1,
             added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
@@ -140,7 +140,7 @@ def create_database():
         CREATE TABLE IF NOT EXISTS wishlist (
             wishlist_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
-            accessory_id TEXT NOT NULL,
+            accessory_id INTEGER NOT NULL,
             added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
             FOREIGN KEY (accessory_id) REFERENCES accessories(accessory_id) ON DELETE CASCADE,
@@ -196,7 +196,7 @@ def create_database():
         CREATE TABLE IF NOT EXISTS order_items (
             order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
             order_id INTEGER NOT NULL,
-            accessory_id TEXT NOT NULL,
+            accessory_id INTEGER NOT NULL,
             accessory_name TEXT NOT NULL,
             quantity INTEGER NOT NULL,
             price REAL NOT NULL,
@@ -318,10 +318,19 @@ def load_accessories_from_csv():
     
     # Connect to database
     conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
     
     try:
-        # Insert data (replace if exists)
-        df_clean.to_sql('accessories', conn, if_exists='replace', index=False)
+        # Delete existing data but keep schema
+        cursor.execute('DELETE FROM accessories')
+        
+        # Insert data row by row to preserve schema
+        for _, row in df_clean.iterrows():
+            columns = ', '.join(row.index)
+            placeholders = ', '.join(['?' for _ in row])
+            cursor.execute(f'INSERT INTO accessories ({columns}) VALUES ({placeholders})', tuple(row))
+        
+        conn.commit()
         print(f"✅ Loaded {len(df_clean)} accessories into database")
         
         # Verify

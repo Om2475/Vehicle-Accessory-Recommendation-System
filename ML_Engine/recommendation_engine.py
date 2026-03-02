@@ -212,14 +212,29 @@ class PersonalizedRecommendationEngine:
         scores_df['preference_score'] = self._calculate_preference_match(filtered_df, user_profile)
         scores_df['emotion_score'] = self._calculate_emotion_alignment(filtered_df, user_profile)
         
-        # Weighted final score
-        scores_df['final_score'] = (
-            scores_df['car_score'] * 0.25 +
-            scores_df['content_score'] * 0.20 +  # Includes category matching
-            scores_df['quality_score'] * 0.25 +
-            scores_df['preference_score'] * 0.20 +  # Also includes category preference
-            scores_df['emotion_score'] * 0.10
-        )
+        # Weighted final score - adjust weights based on whether search query exists
+        if 'search_query' in user_profile and user_profile['search_query']:
+            # When keyword search is used, prioritize content matching VERY heavily
+            print(f"🎯 KEYWORD MODE: Applying 60% weight to content matching")
+            scores_df['final_score'] = (
+                scores_df['car_score'] * 0.10 +
+                scores_df['content_score'] * 0.60 +  # HEAVILY prioritize keyword matches
+                scores_df['quality_score'] * 0.10 +
+                scores_df['preference_score'] * 0.15 +
+                scores_df['emotion_score'] * 0.05
+            )
+            # Show top content scores
+            top_content = scores_df.nlargest(5, 'content_score')[['content_score']]
+            print(f"📊 Top 5 content scores:\n{top_content}")
+        else:
+            # Default weights when no keyword search
+            scores_df['final_score'] = (
+                scores_df['car_score'] * 0.25 +
+                scores_df['content_score'] * 0.20 +  # Includes category matching
+                scores_df['quality_score'] * 0.25 +
+                scores_df['preference_score'] * 0.20 +  # Also includes category preference
+                scores_df['emotion_score'] * 0.10
+            )
         
         # Select diverse recommendations
         recommendations_idx = self._select_diverse_recommendations(
@@ -236,6 +251,12 @@ class PersonalizedRecommendationEngine:
         
         # Sort by score
         recommendations = recommendations.sort_values('final_score', ascending=False)
+        
+        # Debug: Show final ranking if keyword search
+        if 'search_query' in user_profile and user_profile['search_query']:
+            print(f"\n🏆 FINAL RANKING for '{user_profile['search_query']}':")
+            for i, (idx, row) in enumerate(recommendations.head(5).iterrows(), 1):
+                print(f"  {i}. {row['Accessory Name'][:50]} (score: {row['final_score']:.3f})")
         
         # Score breakdown
         scores_breakdown = {
@@ -468,11 +489,43 @@ class PersonalizedRecommendationEngine:
         """Calculate content-based similarity score (0-1)"""
         scores = pd.Series(0.5, index=df.index)  # Default neutral score
         
-        # If user provides search query, use TF-IDF similarity
+        # If user provides search query, use TF-IDF similarity with keyword boosting
         if 'search_query' in user_profile and user_profile['search_query']:
-            query_vector = self.tfidf_vectorizer.transform([user_profile['search_query']])
+            query = user_profile['search_query'].lower().strip()
+            query_words = [w for w in query.split() if len(w) > 2]  # Filter out very short words
+            
+            print(f"🔍 KEYWORD SEARCH: '{query}' (words: {query_words})")
+            
+            # Calculate TF-IDF similarity
+            query_vector = self.tfidf_vectorizer.transform([query])
             similarities = cosine_similarity(query_vector, self.tfidf_matrix[df.index]).flatten()
-            scores = scores * 0.3 + similarities * 0.7
+            
+            # Apply keyword match boosting with very aggressive weighting
+            keyword_boost = pd.Series(0.0, index=df.index)
+            exact_matches = []
+            partial_matches = []
+            
+            for idx in df.index:
+                accessory_name = str(df.loc[idx, 'Accessory Name']).lower()
+                accessory_normalized = str(df.loc[idx, 'Accessory_Name_Normalized']).lower()
+                
+                # Exact phrase match in name - highest priority (almost guaranteed top result)
+                if query in accessory_name or query in accessory_normalized:
+                    keyword_boost.loc[idx] = 1.0
+                    exact_matches.append(accessory_name)
+                # All words present in name - very high priority
+                elif query_words and all(word in accessory_name or word in accessory_normalized for word in query_words):
+                    keyword_boost.loc[idx] = 0.9
+                    partial_matches.append(accessory_name)
+                # Any significant word present in name - medium priority
+                elif query_words and any(word in accessory_name or word in accessory_normalized for word in query_words):
+                    keyword_boost.loc[idx] = 0.6
+            
+            print(f"✅ Found {len(exact_matches)} exact matches: {exact_matches[:3]}")
+            print(f"✅ Found {len(partial_matches)} partial matches: {partial_matches[:3]}")
+            
+            # Heavily favor keyword matches over TF-IDF similarity
+            scores = similarities * 0.1 + keyword_boost * 0.9
         
         return scores
     

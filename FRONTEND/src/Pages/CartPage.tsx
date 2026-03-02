@@ -51,7 +51,7 @@ const CartPage: React.FC = () => {
   const totalAmount = getCartTotal() + deliveryCharge;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-background">
       <Navbar user={user} />
       <div className="container mx-auto px-4 py-24">
         {/* Header */}
@@ -66,7 +66,7 @@ const CartPage: React.FC = () => {
                 <ShoppingCart className="h-8 w-8" />
                 Shopping Cart
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 {getCartCount()} {getCartCount() === 1 ? 'item' : 'items'} in your cart
               </p>
             </div>
@@ -84,7 +84,7 @@ const CartPage: React.FC = () => {
           <Card className="p-12 text-center">
             <ShoppingBag className="h-24 w-24 mx-auto text-gray-400 mb-4" />
             <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-muted-foreground mb-6">
               Add some accessories to get started!
             </p>
             <Button onClick={() => navigate('/finder')}>
@@ -100,7 +100,7 @@ const CartPage: React.FC = () => {
                   <div className="flex gap-6">
                     {/* Product Image */}
                     <div className="flex-shrink-0">
-                      <div className="w-32 h-32 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 rounded-lg flex items-center justify-center">
+                      <div className="w-32 h-32 bg-primary/10 rounded-lg flex items-center justify-center">
                         <Package className="h-16 w-16 text-gray-400" />
                       </div>
                     </div>
@@ -111,7 +111,7 @@ const CartPage: React.FC = () => {
                         <div>
                           <h3 className="text-xl font-bold mb-1">{item.accessory_name}</h3>
                           {(item.car_brand || item.car_model) && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                               {item.car_brand} {item.car_model && `- ${item.car_model}`}
                             </p>
                           )}
@@ -136,7 +136,7 @@ const CartPage: React.FC = () => {
                           </Badge>
                         )}
                         {item.final_score && (
-                          <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white">
+                          <Badge className="bg-primary text-primary-foreground">
                             {item.final_score.toFixed(1)}% Match
                           </Badge>
                         )}
@@ -167,10 +167,10 @@ const CartPage: React.FC = () => {
                           </Button>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                          <div className="text-2xl font-bold text-primary">
                             ₹{(item.price * item.quantity).toLocaleString()}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-muted-foreground">
                             ₹{item.price.toLocaleString()} each
                           </div>
                         </div>
@@ -189,11 +189,11 @@ const CartPage: React.FC = () => {
                 {/* Summary Details */}
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Subtotal</span>
+                    <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-semibold">₹{getCartTotal().toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Delivery Charges</span>
+                    <span className="text-muted-foreground">Delivery Charges</span>
                     <span className="font-semibold">
                       {deliveryCharge === 0 ? (
                         <span className="text-green-500">FREE</span>
@@ -210,7 +210,7 @@ const CartPage: React.FC = () => {
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total Amount</span>
-                    <span className="text-red-600 dark:text-red-400">
+                    <span className="text-primary">
                       ₹{totalAmount.toLocaleString()}
                     </span>
                   </div>
@@ -219,7 +219,7 @@ const CartPage: React.FC = () => {
                 {/* Checkout Button */}
                 <Button
                   onClick={handleCheckout}
-                  className="w-full h-12 text-lg bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 mb-4"
+                  className="w-full h-12 text-lg mb-4"
                 >
                   <CreditCard className="mr-2 h-5 w-5" />
                   Proceed to Checkout

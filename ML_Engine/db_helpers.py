@@ -18,6 +18,11 @@ def get_db_connection():
     """Get database connection with row factory"""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    # Ensure foreign key constraints are enforced across all operations
+    try:
+        conn.execute("PRAGMA foreign_keys = ON")
+    except Exception:
+        pass
     return conn
 
 
@@ -63,12 +68,26 @@ class CartDB:
         cursor = conn.cursor()
         
         try:
+            # Convert accessory_id to integer (API sends string, DB uses int)
+            try:
+                accessory_id_int = int(accessory_id)
+            except (ValueError, TypeError):
+                return {'success': False, 'message': f'Invalid accessory ID format: {accessory_id}'}
+            
+            # Validate accessory exists
+            cursor.execute('SELECT accessory_id FROM accessories WHERE accessory_id = ?', (accessory_id_int,))
+            db_accessory = cursor.fetchone()
+            if db_accessory is None:
+                return {'success': False, 'message': f'Accessory not found: {accessory_id}'}
+            
+            actual_accessory_id = db_accessory['accessory_id']
+
             # Check if item already in cart
             cursor.execute('''
                 SELECT cart_id, quantity
                 FROM cart_items
                 WHERE user_id = ? AND accessory_id = ?
-            ''', (user_id, accessory_id))
+            ''', (user_id, actual_accessory_id))
             
             existing = cursor.fetchone()
             
@@ -86,7 +105,7 @@ class CartDB:
                 cursor.execute('''
                     INSERT INTO cart_items (user_id, accessory_id, quantity)
                     VALUES (?, ?, ?)
-                ''', (user_id, accessory_id, quantity))
+                ''', (user_id, actual_accessory_id, quantity))
                 message = 'Item added to cart'
             
             conn.commit()
@@ -107,11 +126,16 @@ class CartDB:
         cursor = conn.cursor()
         
         try:
+            try:
+                accessory_id_int = int(accessory_id)
+            except (ValueError, TypeError):
+                return {'success': False, 'message': 'Invalid accessory ID format'}
+            
             cursor.execute('''
                 UPDATE cart_items
                 SET quantity = ?
                 WHERE user_id = ? AND accessory_id = ?
-            ''', (quantity, user_id, accessory_id))
+            ''', (quantity, user_id, accessory_id_int))
             
             conn.commit()
             
@@ -130,10 +154,15 @@ class CartDB:
         cursor = conn.cursor()
         
         try:
+            try:
+                accessory_id_int = int(accessory_id)
+            except (ValueError, TypeError):
+                return {'success': False, 'message': 'Invalid accessory ID format'}
+            
             cursor.execute('''
                 DELETE FROM cart_items
                 WHERE user_id = ? AND accessory_id = ?
-            ''', (user_id, accessory_id))
+            ''', (user_id, accessory_id_int))
             
             conn.commit()
             
@@ -236,10 +265,22 @@ class WishlistDB:
         cursor = conn.cursor()
         
         try:
+            # Convert accessory_id to integer
+            try:
+                accessory_id_int = int(accessory_id)
+            except (ValueError, TypeError):
+                return {'success': False, 'message': f'Invalid accessory ID format: {accessory_id}'}
+            
+            # Validate accessory exists
+            cursor.execute('SELECT accessory_id FROM accessories WHERE accessory_id = ?', (accessory_id_int,))
+            db_accessory = cursor.fetchone()
+            if db_accessory is None:
+                return {'success': False, 'message': f'Accessory not found: {accessory_id}'}
+
             cursor.execute('''
                 INSERT INTO wishlist (user_id, accessory_id)
                 VALUES (?, ?)
-            ''', (user_id, accessory_id))
+            ''', (user_id, accessory_id_int))
             
             conn.commit()
             return {'success': True, 'message': 'Item added to wishlist'}
@@ -258,10 +299,15 @@ class WishlistDB:
         cursor = conn.cursor()
         
         try:
+            try:
+                accessory_id_int = int(accessory_id)
+            except (ValueError, TypeError):
+                return {'success': False, 'message': 'Invalid accessory ID format'}
+            
             cursor.execute('''
                 DELETE FROM wishlist
                 WHERE user_id = ? AND accessory_id = ?
-            ''', (user_id, accessory_id))
+            ''', (user_id, accessory_id_int))
             
             conn.commit()
             
@@ -280,10 +326,15 @@ class WishlistDB:
         cursor = conn.cursor()
         
         try:
+            try:
+                accessory_id_int = int(accessory_id)
+            except (ValueError, TypeError):
+                return False
+            
             cursor.execute('''
                 SELECT 1 FROM wishlist
                 WHERE user_id = ? AND accessory_id = ?
-            ''', (user_id, accessory_id))
+            ''', (user_id, accessory_id_int))
             
             return cursor.fetchone() is not None
             
@@ -380,15 +431,29 @@ class OrderDB:
             
             order_id = cursor.lastrowid
             
-            # Insert order items
+            # Insert order items with validated accessory_id
             for item in cart_items:
+                # Convert to integer and validate
+                try:
+                    accessory_id_int = int(item['accessory_id'])
+                except (ValueError, TypeError):
+                    raise ValueError(f"Invalid accessory ID format: {item['accessory_id']}")
+                
+                # Validate accessory exists
+                cursor.execute('SELECT accessory_id FROM accessories WHERE accessory_id = ?', 
+                              (accessory_id_int,))
+                db_accessory = cursor.fetchone()
+                
+                if db_accessory is None:
+                    raise ValueError(f"Accessory not found: {item['accessory_id']}")
+                
                 cursor.execute('''
                     INSERT INTO order_items (
                         order_id, accessory_id, accessory_name, quantity, price
                     ) VALUES (?, ?, ?, ?, ?)
                 ''', (
                     order_id,
-                    item['accessory_id'],
+                    accessory_id_int,
                     item.get('accessory_name', ''),
                     item['quantity'],
                     item['price']

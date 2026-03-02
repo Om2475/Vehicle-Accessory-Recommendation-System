@@ -12,6 +12,7 @@ import CartPage from './Pages/CartPage';
 import WishlistPage from './Pages/WishlistPage';
 import CheckoutPage from './Pages/CheckoutPage';
 import OrderSuccessPage from './Pages/OrderSuccessPage';
+import AnalyticsPage from './Pages/AnalyticsPage';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -28,21 +29,24 @@ function AppRoutes() {
       <Route path="/wishlist" element={<WishlistPage user={user} />} />
       <Route path="/checkout" element={<CheckoutPage user={user} />} />
       <Route path="/order-success" element={<OrderSuccessPage user={user} />} />
+      <Route path="/analytics" element={<AnalyticsPage user={user} />} />
     </Routes>
   );
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <WishlistProvider>
-        <CartProvider>
-          <Router>
-            <AppRoutes />
-          </Router>
-        </CartProvider>
-      </WishlistProvider>
-    </AuthProvider>
+    <div className="min-h-screen bg-background">
+      <AuthProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <Router>
+              <AppRoutes />
+            </Router>
+          </CartProvider>
+        </WishlistProvider>
+      </AuthProvider>
+    </div>
   );
 }
 

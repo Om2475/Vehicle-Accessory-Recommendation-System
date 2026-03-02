@@ -257,14 +257,14 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
+      <div className="min-h-screen bg-background">
         <Navbar user={user} />
         <div className="container mx-auto px-4 py-24">
           <Card className="p-12 text-center">
             <Package className="h-24 w-24 mx-auto text-gray-400 mb-4" />
             <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
-            <p className="text-gray-600 mb-6">Add some items to proceed to checkout</p>
-            <Button onClick={() => navigate('/finder')} className="bg-gradient-to-r from-red-600 to-orange-600">
+            <p className="text-muted-foreground mb-6">Add some items to proceed to checkout</p>
+            <Button onClick={() => navigate('/finder')}>
               Start Shopping
             </Button>
           </Card>
@@ -274,7 +274,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
+    <div className="min-h-screen bg-background">
       <Navbar user={user} />
       
       <div className="container mx-auto px-4 py-24">
@@ -288,7 +288,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
           <div className="lg:col-span-2 space-y-6">
             <Card className="p-6">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <MapPin className="h-6 w-6 text-red-500" />
+                <MapPin className="h-6 w-6 text-primary" />
                 Delivery Information
               </h2>
               <form onSubmit={handlePlaceOrder} className="space-y-4">
@@ -296,7 +296,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name *</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="fullName"
                         name="fullName"
@@ -311,7 +311,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number *</Label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="phone"
                         name="phone"
@@ -328,7 +328,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address *</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
                       name="email"
@@ -411,7 +411,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
             {/* Payment Method */}
             <Card className="p-6">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <CreditCard className="h-6 w-6 text-red-500" />
+                <CreditCard className="h-6 w-6 text-primary" />
                 Payment Method
               </h2>
               <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
@@ -419,21 +419,21 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
                   <div className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-red-50 transition-colors">
                     <RadioGroupItem value="card" id="card" />
                     <Label htmlFor="card" className="flex items-center gap-2 cursor-pointer flex-1">
-                      <CreditCard className="h-5 w-5 text-red-500" />
+                      <CreditCard className="h-5 w-5 text-primary" />
                       <span className="font-medium">Credit/Debit Card</span>
                     </Label>
                   </div>
                   <div className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-red-50 transition-colors">
                     <RadioGroupItem value="upi" id="upi" />
                     <Label htmlFor="upi" className="flex items-center gap-2 cursor-pointer flex-1">
-                      <Wallet className="h-5 w-5 text-red-500" />
+                      <Wallet className="h-5 w-5 text-primary" />
                       <span className="font-medium">UPI Payment</span>
                     </Label>
                   </div>
                   <div className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-red-50 transition-colors">
                     <RadioGroupItem value="cod" id="cod" />
                     <Label htmlFor="cod" className="flex items-center gap-2 cursor-pointer flex-1">
-                      <Building className="h-5 w-5 text-red-500" />
+                      <Building className="h-5 w-5 text-primary" />
                       <span className="font-medium">Cash on Delivery</span>
                     </Label>
                   </div>
@@ -495,20 +495,20 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="p-6 sticky top-24">
+            <Card className="p-6">
               <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
 
               {/* Items */}
               <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
                 {cartItems.map((item) => (
-                  <div key={item.accessory_id} className="flex gap-3 p-2 bg-gray-50 rounded-lg">
-                    <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-orange-100 rounded flex items-center justify-center flex-shrink-0">
-                      <Package className="h-8 w-8 text-red-400" />
+                  <div key={item.accessory_id} className="flex gap-3 p-2 bg-secondary/10 rounded-lg">
+                    <div className="w-16 h-16 bg-primary/10 rounded flex items-center justify-center flex-shrink-0">
+                      <Package className="h-8 w-8 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{item.accessory_name}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                      <p className="text-sm font-bold text-red-600">
+                      <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                      <p className="text-sm font-bold text-primary">
                         ₹{(item.price * item.quantity).toLocaleString()}
                       </p>
                     </div>
@@ -521,11 +521,11 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
               {/* Pricing */}
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-muted-foreground">Subtotal</span>
                   <span className="font-semibold">₹{getCartTotal().toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Delivery Charges</span>
+                  <span className="text-muted-foreground">Delivery Charges</span>
                   <span className="font-semibold">
                     {deliveryCharge === 0 ? (
                       <span className="text-green-500">FREE</span>
@@ -537,7 +537,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
                 <Separator />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total Amount</span>
-                  <span className="text-red-600">₹{totalAmount.toLocaleString()}</span>
+                  <span className="text-primary">₹{totalAmount.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -545,7 +545,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
               <Button
                 onClick={handlePlaceOrder}
                 disabled={isProcessing}
-                className="w-full h-12 text-lg bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
+                className="w-full h-12 text-lg"
               >
                 {isProcessing ? (
                   <>
@@ -562,11 +562,11 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ user }) => {
 
               {/* Benefits */}
               <div className="mt-6 space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <Truck className="h-4 w-4 text-green-500" />
                   <span>Free delivery on orders above ₹500</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <CheckCircle2 className="h-4 w-4 text-blue-500" />
                   <span>Secure payment processing</span>
                 </div>

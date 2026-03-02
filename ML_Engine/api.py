@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
 import uvicorn
 from recommendation_engine import PersonalizedRecommendationEngine
+from database import create_database
 import pandas as pd
 from auth import UserAuth, SessionManager, AuthenticationError
 from db_helpers import CartDB, WishlistDB, OrderDB, AccessoryDB
@@ -109,6 +110,12 @@ async def startup_event():
     """Initialize recommendation engine on startup"""
     global rec_engine
     print("🚀 Starting Recommendation Engine API...")
+    # Ensure database schema exists (creates tables like 'users' if missing)
+    try:
+        create_database()
+        print("✅ Database schema verified/created")
+    except Exception as e:
+        print(f"⚠️ Database schema setup failed: {e}")
     rec_engine = PersonalizedRecommendationEngine()
     print("✅ Recommendation Engine loaded successfully")
 
@@ -576,6 +583,36 @@ def get_current_user(authorization: Optional[str] = Header(None)) -> int:
         return user_id
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid authorization header format")
+
+
+# ==================== DEBUG ENDPOINTS ====================
+
+@app.get("/debug/cart-raw")
+async def debug_cart_raw(user_id: int = Depends(get_current_user)):
+    """Debug: Return cart rows without accessory join to diagnose insert issues"""
+    from db_helpers import get_db_connection
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT cart_id, user_id, accessory_id, quantity, added_at FROM cart_items WHERE user_id = ? ORDER BY added_at DESC", (user_id,))
+        rows = [dict(r) for r in cur.fetchall()]
+        return {"success": True, "rows": rows, "count": len(rows)}
+    finally:
+        conn.close()
+
+
+@app.get("/debug/wishlist-raw")
+async def debug_wishlist_raw(user_id: int = Depends(get_current_user)):
+    """Debug: Return wishlist rows without accessory join to diagnose insert issues"""
+    from db_helpers import get_db_connection
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT wishlist_id, user_id, accessory_id, added_at FROM wishlist WHERE user_id = ? ORDER BY added_at DESC", (user_id,))
+        rows = [dict(r) for r in cur.fetchall()]
+        return {"success": True, "rows": rows, "count": len(rows)}
+    finally:
+        conn.close()
 
 
 # ==================== AUTHENTICATION ENDPOINTS ====================
