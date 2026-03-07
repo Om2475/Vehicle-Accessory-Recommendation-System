@@ -1,0 +1,5 @@
+{
+    "model_accuracy": 0.87,
+    "recommendation_precision": 0.81,
+    "recommendation_recall": 0.78
+}

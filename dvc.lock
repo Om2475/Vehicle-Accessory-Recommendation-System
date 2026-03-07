@@ -1,14 +1,19 @@
 schema: '2.0'
 stages:
   train:
-    cmd: python ML_Engine\recommendation_engine.py
+    cmd: python ML_Engine/recommendation_engine.py
     deps:
     - path: Dataset
       hash: md5
       md5: 12aa7ed13c4653f39541b1e149fed9e9.dir
       size: 4605436
       nfiles: 9
-    - path: ML_Engine\recommendation_engine.py
+    - path: ML_Engine/recommendation_engine.py
       hash: md5
-      md5: 41913fa0e684c5860e78313d7cb4b2e7
-      size: 37341
+      md5: 9178084b9244be1f105699f847350a5e
+      size: 37558
+    outs:
+    - path: metrics.json
+      hash: md5
+      md5: c9b386b8a66b8e0981388bca07fe1a95
+      size: 107
