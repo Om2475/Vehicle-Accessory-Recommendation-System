@@ -1,0 +1,9 @@
+stages:
+  train:
+    cmd: python ML_Engine\recommendation_engine.py
+    deps:
+    - Dataset
+    - ML_Engine\recommendation_engine.py
+    outs:
+    - ML_Engine\tfidf_matrix.pkl
+    - ML_Engine\tfidf_vectorizer.pkl

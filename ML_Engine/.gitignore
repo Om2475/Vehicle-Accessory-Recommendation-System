@@ -36,3 +36,5 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+/tfidf_matrix.pkl
+/tfidf_vectorizer.pkl
