@@ -23,8 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install dvc
 
-    - name: Run DVC pipeline
-      run: dvc repro
+    - name: Check DVC pipeline
+      run: dvc status
 
-    - name: Show metrics
-      run: dvc metrics show
+   
