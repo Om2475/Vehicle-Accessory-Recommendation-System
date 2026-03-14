@@ -1,6 +1,8 @@
 stages:
   train:
-    cmd: python ML_Engine\recommendation_engine.py
+    cmd: python ML_Engine/recommendation_engine.py
     deps:
-    - Dataset
-    - ML_Engine\recommendation_engine.py
+      - Dataset
+      - ML_Engine/recommendation_engine.py
+    metrics:
+      - metrics.json
